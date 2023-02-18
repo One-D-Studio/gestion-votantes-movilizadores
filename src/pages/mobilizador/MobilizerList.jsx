@@ -1,8 +1,5 @@
-import {useState, useEffect} from 'react'
 import { Card, CardBody } from "reactstrap";
 import MobilizerCamera from "./MobilizerCamera";
-import axios from "axios";
-import { axiosInstance } from '../../config/axiosInstance';
 
 const MobilizerList = () => {
 
