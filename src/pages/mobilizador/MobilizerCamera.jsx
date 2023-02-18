@@ -4,15 +4,10 @@ import { Button, Modal, ModalBody, ModalFooter } from "reactstrap";
 import MobilizerModal from "./MobilizerModal";
 
 const videoConstraints = {
-  width: 1500,
-  facinMode: "environment",
-};
-
-// const videoConstraints = {
-//     width: 1500,
-//     height: 720,
-//     facingMode: { exact: "environment" }
-//   };
+    width: 1500,
+    height: 720,
+    facingMode: { exact: "environment" }
+  };
 
 const MobilizerCamera = (args) => {
   const webcamRef = useRef(null);
