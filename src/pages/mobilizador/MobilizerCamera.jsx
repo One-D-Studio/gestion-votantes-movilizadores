@@ -1,19 +1,31 @@
 import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { Button, Modal, ModalBody, ModalFooter } from "reactstrap";
-import MobilizerModal from "./MobilizerModal";
+import axios from "axios";
 
 const videoConstraints = {
-    width: 1500,
-    height: 720,
-    facingMode: { exact: "environment" }
-  };
+  width: 1500,
+  height: 720,
+  facingMode: { exact: "environment" }
+};
 
 const MobilizerCamera = (args) => {
   const webcamRef = useRef(null);
   const [url, setUrl] = useState(null);
   const [modalCamara, setModalCamara] = useState(false);
   const [modal, setModal] = useState(false);
+
+  const captureFoto = React.useCallback(async () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    setUrl(imageSrc);
+  }, [webcamRef]);
+
+  const imagen = webcamRef.current;
+  const blob = fetch(imagen).then((response) => response.blob());
+  const file = new File([blob], "Foto del movilizador", {
+    type: ("image/png", "image/jpeg", "image/svg", "image/webp"),
+    lastModified: Date.now(),
+  });
 
   const openModalCamara = () => {
     setModalCamara(true);
@@ -27,12 +39,17 @@ const MobilizerCamera = (args) => {
   };
   const closeModal = () => {
     setModal(false);
-  };
 
-  const captureFoto = React.useCallback(async () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setUrl(imageSrc);
-  }, [webcamRef]);
+    const formData = new FormData();
+    formData.append("file", file);
+    const config = {
+      headers: { "content-type": "multipart/form-data" },
+    };
+    axios
+      .post(url, formData, config)
+      .then(response => response)
+      .catch((error) => alert(error));
+  };
 
   return (
     <>
@@ -45,12 +62,15 @@ const MobilizerCamera = (args) => {
         Tomar Fotos
       </Button>
       {modalCamara && (
-        <Modal isOpen={modalCamara}  {...args}>
+        <Modal isOpen={modalCamara} {...args}>
           <ModalBody>
             <Webcam
               ref={webcamRef}
               audio={false}
               videoConstraints={videoConstraints}
+              screenshotFormat={
+                ("image/png", "image/jpeg", "image/svg", "image/webp")
+              }
               mirrored={true}
               className="camara"
             />
@@ -75,7 +95,7 @@ const MobilizerCamera = (args) => {
               color="primary"
               onClick={() => {
                 openModal();
-                closeModalCamara()
+                closeModalCamara();
               }}
             >
               Guardar
@@ -92,14 +112,28 @@ const MobilizerCamera = (args) => {
       {modal && (
         <Modal isOpen={modal} {...args}>
           <ModalBody>
-            <h3><b>¿Desdea guardar la foto?</b></h3>
+            <h3>
+              <b>¿Desdea guardar la foto?</b>
+            </h3>
             <p>Una vez que acepte guarda la foto no se podra volver atras</p>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onClick={() => {closeModal(); closeModalCamara()}}>
+            <Button
+              color="primary"
+              onClick={() => {
+                closeModal();
+                closeModalCamara();
+              }}
+            >
               Aceptar
             </Button>
-            <Button color="danger" onClick={closeModal}>
+            <Button
+              color="danger"
+              onClick={() => {
+                closeModal();
+                openModalCamara();
+              }}
+            >
               Cancelar
             </Button>
           </ModalFooter>
